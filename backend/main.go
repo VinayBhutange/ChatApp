@@ -1,26 +1,21 @@
 package main
 
 import (
+	"backend/internal"
 	"log"
 	"net/http"
 )
 
 func main() {
-	hub := newHub()
-	go hub.run()
+	hub := internal.NewHub()
+	go hub.Run()
 
-	// Serve static files from the "../frontend" directory
-	fs := http.FileServer(http.Dir("../frontend"))
-	http.Handle("/", fs)
-
-	// Configure the WebSocket route
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		serveWs(hub, w, r)
-	})
+	// Create the router
+	router := internal.NewRouter(hub)
 
 	// Start the server
 	log.Println("HTTP server starting on :8080")
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", router)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
