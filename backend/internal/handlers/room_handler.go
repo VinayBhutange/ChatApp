@@ -63,7 +63,7 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 func (h *RoomHandler) GetRooms(w http.ResponseWriter, r *http.Request) {
 	// This endpoint doesn't require authentication check as we're just listing rooms
 
-	rooms, err := h.roomService.GetAllRooms()
+	rooms, err := h.roomService.GetRooms()
 	if err != nil {
 		http.Error(w, "Failed to retrieve rooms", http.StatusInternalServerError)
 		return

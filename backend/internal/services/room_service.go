@@ -7,13 +7,13 @@ import (
 	"github.com/google/uuid"
 )
 
-// RoomService provides chat room-related business logic.
+// RoomService provides room-related business logic.
 type RoomService struct {
-	store *store.Store
+	store store.StoreInterface
 }
 
 // NewRoomService creates a new RoomService.
-func NewRoomService(s *store.Store) *RoomService {
+func NewRoomService(s store.StoreInterface) *RoomService {
 	return &RoomService{store: s}
 }
 
@@ -33,7 +33,18 @@ func (s *RoomService) CreateRoom(name, creatorID string) (*models.ChatRoom, erro
 	return newRoom, nil
 }
 
-// GetAllRooms retrieves all chat rooms from the database.
-func (s *RoomService) GetAllRooms() ([]models.ChatRoom, error) {
-	return s.store.GetAllRooms()
+// GetRooms returns all chat rooms.
+func (s *RoomService) GetRooms() ([]models.ChatRoom, error) {
+	rooms, err := s.store.GetAllRooms()
+	if err != nil {
+		return nil, err
+	}
+	
+	// Convert []*models.ChatRoom to []models.ChatRoom
+	result := make([]models.ChatRoom, len(rooms))
+	for i, room := range rooms {
+		result[i] = *room
+	}
+	
+	return result, nil
 }

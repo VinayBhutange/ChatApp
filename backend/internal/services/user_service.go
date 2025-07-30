@@ -21,7 +21,7 @@ const TokenExpiration = 24 * time.Hour
 
 // UserService provides user-related business logic.
 type UserService struct {
-	store *store.Store
+	store store.StoreInterface
 }
 
 // TokenClaims represents the claims in the JWT token
@@ -32,7 +32,7 @@ type TokenClaims struct {
 }
 
 // NewUserService creates a new UserService.
-func NewUserService(s *store.Store) *UserService {
+func NewUserService(s store.StoreInterface) *UserService {
 	return &UserService{store: s}
 }
 

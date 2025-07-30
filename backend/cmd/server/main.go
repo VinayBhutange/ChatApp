@@ -2,46 +2,55 @@ package main
 
 import (
 	"backend/internal/api"
+	"backend/internal/config"
 	"backend/internal/handlers"
 	"backend/internal/services"
 	"backend/internal/store"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
-	// Initialize the database store
-	db, err := store.New("chat.db")
+	log.Println("Starting Chat Application Server...")
+
+	// Initialize database configuration
+	dbConfig := config.NewDatabaseConfig()
+	
+	// Initialize store
+	dbStore, err := store.NewDBStore(dbConfig)
 	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+		log.Fatalf("Failed to initialize database: %v", err)
 	}
+	defer dbStore.Close()
 
 	// Run database migrations
-	if err := db.Migrate(); err != nil {
-		log.Fatalf("failed to migrate database: %v", err)
+	if err := dbStore.Migrate(); err != nil {
+		log.Fatalf("Failed to migrate database: %v", err)
 	}
 
-	log.Println("Database initialized and migrated successfully.")
+	// Initialize services
+	userService := services.NewUserService(dbStore)
+	roomService := services.NewRoomService(dbStore)
+	messageService := services.NewMessageService(dbStore)
 
-	// --- Dependency Injection ---
-	// Create services
-	userService := services.NewUserService(db)
-	roomService := services.NewRoomService(db)
-	messageService := services.NewMessageService(db)
-
-	// Create WebSocket handler and start its goroutine
-	wsHandler := handlers.NewWebSocketHandler(messageService)
-	go wsHandler.Run()
-
-	// Create handlers
+	// Initialize handlers
 	userHandler := handlers.NewUserHandler(userService)
 	roomHandler := handlers.NewRoomHandler(roomService)
+	wsHandler := handlers.NewWebSocketHandler(messageService)
 
-	// Create the main API router
+	// Initialize router
 	router := api.NewRouter(userHandler, roomHandler, wsHandler)
 
-	log.Println("API server starting on :8082")
-	if err := http.ListenAndServe(":8082", router); err != nil {
-		log.Fatalf("Could not start server: %s\n", err)
+	// Get port from environment variable or use default
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8082"
+	}
+
+	// Start the server
+	log.Printf("Server starting on port %s...", port)
+	if err := http.ListenAndServe(":"+port, router); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
 	}
 }
