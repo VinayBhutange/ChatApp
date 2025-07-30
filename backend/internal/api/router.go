@@ -7,7 +7,7 @@ import (
 )
 
 // NewRouter creates the main API router and registers all the application's routes.
-func NewRouter(userHandler *handlers.UserHandler, roomHandler *handlers.RoomHandler) *http.ServeMux {
+func NewRouter(userHandler *handlers.UserHandler, roomHandler *handlers.RoomHandler, wsHandler *handlers.WebSocketHandler) *http.ServeMux {
 	router := http.NewServeMux()
 
 	// Public routes - no authentication required
@@ -17,6 +17,7 @@ func NewRouter(userHandler *handlers.UserHandler, roomHandler *handlers.RoomHand
 
 	// Protected routes - require authentication
 	router.Handle("/api/rooms/create", middleware.RequireAuth(roomHandler.CreateRoom))
+	router.Handle("/api/ws", middleware.RequireAuth(http.HandlerFunc(wsHandler.ServeWs)))
 
 	return router
 }

@@ -3,7 +3,9 @@ package services
 import (
 	"backend/internal/models"
 	"backend/internal/store"
+	"database/sql"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -36,24 +38,44 @@ func NewUserService(s *store.Store) *UserService {
 
 // RegisterUser handles the business logic of creating a new user.
 func (s *UserService) RegisterUser(username, password string) (*models.User, error) {
+	log.Printf("RegisterUser: Starting registration for username: %s", username)
+	
+	// Check if username already exists
+	_, err := s.GetUserByUsername(username)
+	if err == nil {
+		// User already exists
+		log.Printf("RegisterUser: Username %s already exists", username)
+		return nil, errors.New("username already exists")
+	} else if err != sql.ErrNoRows {
+		// Some other database error occurred
+		log.Printf("RegisterUser: Error checking for existing username: %v", err)
+		return nil, err
+	}
+	
 	// Hash the password for security
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
+		log.Printf("RegisterUser: Failed to hash password: %v", err)
 		return nil, err
 	}
 
 	// Create a new user model
+	userID := uuid.NewString()
+	log.Printf("RegisterUser: Generated UUID: %s", userID)
 	newUser := &models.User{
-		ID:       uuid.NewString(),
+		ID:       userID,
 		Username: username,
 		Password: string(hashedPassword),
 	}
 
 	// Save the user to the database
+	log.Printf("RegisterUser: Attempting to save user to database")
 	if err := s.store.CreateUser(newUser); err != nil {
+		log.Printf("RegisterUser: Database error creating user: %v", err)
 		return nil, err
 	}
 
+	log.Printf("RegisterUser: User successfully created in database")
 	return newUser, nil
 }
 

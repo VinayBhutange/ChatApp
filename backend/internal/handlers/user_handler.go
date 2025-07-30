@@ -3,6 +3,7 @@ package handlers
 import (
 	"backend/internal/services"
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -41,12 +42,21 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("Attempting to register user: %s", req.Username)
 	user, err := h.userService.RegisterUser(req.Username, req.Password)
 	if err != nil {
-		// In a real app, you'd check for specific errors, like username already exists.
-		http.Error(w, "Failed to register user", http.StatusInternalServerError)
+		// Log the detailed error
+		log.Printf("Failed to register user: %v", err)
+		
+		// Check for specific error types
+		if err.Error() == "username already exists" {
+			http.Error(w, "Username already exists. Please choose a different username.", http.StatusConflict) // 409 Conflict
+		} else {
+			http.Error(w, "Failed to register user: "+err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
+	log.Printf("User registered successfully: %s (ID: %s)", user.Username, user.ID)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)

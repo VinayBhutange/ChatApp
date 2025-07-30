@@ -27,16 +27,21 @@ func main() {
 	// Create services
 	userService := services.NewUserService(db)
 	roomService := services.NewRoomService(db)
+	messageService := services.NewMessageService(db)
+
+	// Create WebSocket handler and start its goroutine
+	wsHandler := handlers.NewWebSocketHandler(messageService)
+	go wsHandler.Run()
 
 	// Create handlers
 	userHandler := handlers.NewUserHandler(userService)
 	roomHandler := handlers.NewRoomHandler(roomService)
 
 	// Create the main API router
-	router := api.NewRouter(userHandler, roomHandler)
+	router := api.NewRouter(userHandler, roomHandler, wsHandler)
 
-	log.Println("API server starting on :8081")
-	if err := http.ListenAndServe(":8081", router); err != nil {
+	log.Println("API server starting on :8082")
+	if err := http.ListenAndServe(":8082", router); err != nil {
 		log.Fatalf("Could not start server: %s\n", err)
 	}
 }
