@@ -21,7 +21,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     <div className={`message-container ${isOwnMessage ? 'own-message' : 'other-message'}`}>
       <div className="message-bubble">
         {!isOwnMessage && (
-          <div className="message-sender">{message.senderUsername || 'Unknown User'}</div>
+          <div className="sender-name">{message.sender || 'Unknown User'}</div>
         )}
         <div className="message-content">{message.content}</div>
         <div className="message-time">{formatTime(message.timestamp)}</div>

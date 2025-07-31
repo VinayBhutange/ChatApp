@@ -1,53 +1,72 @@
+/* General container for each message */
 .message-container {
   display: flex;
-  margin-bottom: 0.5rem;
+  margin-bottom: 12px;
+  max-width: 75%;
+  flex-direction: column; /* Stack bubble and sender info */
 }
 
-.message-container.own-message {
-  justify-content: flex-end;
+/* Align own messages to the right */
+.own-message {
+  align-self: flex-end;
+  align-items: flex-end;
 }
 
+/* Align other users' messages to the left */
+.other-message {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+/* The message bubble itself */
 .message-bubble {
-  max-width: 70%;
-  padding: 0.75rem;
-  border-radius: 1rem;
+  padding: 10px 15px;
+  border-radius: 18px;
   position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  word-wrap: break-word;
+  display: inline-block; /* Fit content */
 }
 
+/* Style for your own message bubbles */
 .own-message .message-bubble {
-  background-color: #4a69bd;
-  color: white;
-  border-bottom-right-radius: 0.25rem;
+  background-color: #dcf8c6; /* WhatsApp-like green */
+  color: #303030;
+  border-bottom-right-radius: 4px;
 }
 
+/* Style for other users' message bubbles */
 .other-message .message-bubble {
-  background-color: #e6e6e6;
-  color: #333;
-  border-bottom-left-radius: 0.25rem;
+  background-color: #ffffff; /* Clean white */
+  color: #303030;
+  border: 1px solid #f0f0f0;
+  border-bottom-left-radius: 4px;
 }
 
-.message-sender {
-  font-weight: 600;
+/* Sender's name for group chats or other users' messages */
+.sender-name {
+  font-weight: bold;
   font-size: 0.85rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 4px;
+  color: #075e54; /* A darker green for the name */
 }
 
+/* The actual message content */
 .message-content {
-  word-break: break-word;
+  font-size: 0.95rem;
+  padding-right: 50px; /* Make space for the timestamp */
   line-height: 1.4;
 }
 
+/* Timestamp style */
 .message-time {
-  font-size: 0.75rem;
-  opacity: 0.7;
-  text-align: right;
-  margin-top: 0.25rem;
+  font-size: 0.7rem;
+  color: #999;
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
 }
 
 .own-message .message-time {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.other-message .message-time {
-  color: #666;
+  color: #669353;
 }

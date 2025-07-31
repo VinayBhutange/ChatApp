@@ -15,9 +15,9 @@ export interface Message {
   id: string;
   roomId: string;
   senderId: string;
+  sender: string; // The username of the message sender
   content: string;
   timestamp: string;
-  senderUsername?: string; // Optional field that might be populated from the API
 }
 
 // Authentication state
