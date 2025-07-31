@@ -23,7 +23,8 @@ func NewRouter(userHandler *handlers.UserHandler, roomHandler *handlers.RoomHand
 
 	// Protected routes - require authentication
 	router.Handle("/api/rooms/create", middleware.RequireAuth(roomHandler.CreateRoom))
-	router.Handle("/api/ws", middleware.RequireAuth(http.HandlerFunc(wsHandler.ServeWs)))
+		// The WebSocket handler performs its own authentication, so we don't need the RequireAuth middleware here.
+	router.HandleFunc("/api/ws", wsHandler.ServeWs)
 
 	// Apply CORS middleware to all routes
 	return middleware.CORS(router)

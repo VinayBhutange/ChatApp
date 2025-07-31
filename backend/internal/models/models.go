@@ -17,9 +17,10 @@ type ChatRoom struct {
 
 // Message represents a chat message in the system.
 type Message struct {
-	ID        string    `json:"id"`
-	RoomID    string    `json:"room_id"`
-	SenderID  string    `json:"sender_id"`
-	Content   string    `json:"content"`
-	Timestamp time.Time `json:"timestamp"`
+	ID             string    `json:"id" db:"id"`
+	RoomID         string    `json:"roomId" db:"room_id"`
+	SenderID       string    `json:"senderId" db:"sender_id"`
+	Content        string    `json:"content" db:"content"`
+	Timestamp      time.Time `json:"timestamp" db:"timestamp"`
+	SenderUsername string    `json:"-"` // This field is for internal use and not stored in the DB
 }

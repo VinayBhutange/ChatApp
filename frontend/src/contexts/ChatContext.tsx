@@ -44,9 +44,11 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   }, [socket]);
 
-  // Handle WebSocket messages
+  // Handle WebSocket messages and reconnection
   useEffect(() => {
-    if (socket) {
+    if (socket && state.currentRoom) {
+      const roomId = state.currentRoom.id;
+      
       socket.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data);
@@ -63,15 +65,35 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.error('WebSocket error:', error);
         setState((prevState) => ({
           ...prevState,
-          error: 'WebSocket connection error',
+          error: 'WebSocket connection error - will attempt to reconnect',
         }));
       };
 
-      socket.onclose = () => {
-        console.log('WebSocket connection closed');
+      socket.onclose = (event) => {
+        console.log(`WebSocket connection closed: ${event.code} ${event.reason || ''}`);
+        
+        // Attempt to reconnect after a delay if not a clean close
+        if (!event.wasClean && state.currentRoom) {
+          console.log(`Attempting to reconnect to room ${roomId} in 3 seconds...`);
+          
+          // Set a timeout to reconnect
+          const reconnectTimer = setTimeout(() => {
+            console.log(`Reconnecting to room ${roomId}...`);
+            try {
+              const newSocket = createWebSocketConnection(roomId);
+              setSocket(newSocket);
+              console.log('Reconnection attempt initiated');
+            } catch (reconnectError) {
+              console.error('Failed to reconnect:', reconnectError);
+            }
+          }, 3000);
+          
+          // Clear the timeout if the component unmounts or socket changes
+          return () => clearTimeout(reconnectTimer);
+        }
       };
     }
-  }, [socket]);
+  }, [socket, state.currentRoom]);
 
   const fetchRooms = async () => {
     setState((prevState) => ({ ...prevState, isLoading: true, error: null }));
