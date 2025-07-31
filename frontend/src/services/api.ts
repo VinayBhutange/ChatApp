@@ -1,8 +1,8 @@
 // API service for handling backend communication
 import { User, Room, Message } from '../types';
 
-// Using relative URL with proxy configuration from package.json
-const API_URL = '/api';
+// Use explicit backend URL instead of relying on proxy
+const API_URL = 'http://localhost:8082/api';
 
 // Store the JWT token in localStorage
 export const setToken = (token: string): void => {
@@ -84,16 +84,29 @@ export const createWebSocketConnection = (roomId: string): WebSocket => {
     throw new Error('Authentication required for WebSocket connection');
   }
   
-  // Create WebSocket URL using window.location to match the current host
+  // Use explicit WebSocket URL
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const host = window.location.host;
+  const host = 'localhost:8082'; // Hardcode the backend server address
+  
   // Include token directly in the URL for authentication
-  const ws = new WebSocket(`${protocol}//${host}/api/ws?room_id=${roomId}&token=${token}`);
+  const wsUrl = `${protocol}//${host}/api/ws?room_id=${roomId}&token=${token}`;
+  console.log(`Attempting to connect to WebSocket at: ${wsUrl}`);
   
-  // Set up connection event handlers
-  ws.onopen = () => {
-    console.log('WebSocket connection established');
-  };
-  
-  return ws;
+  try {
+    const ws = new WebSocket(wsUrl);
+    
+    // Set up connection event handlers
+    ws.onopen = () => {
+      console.log('WebSocket connection established successfully');
+    };
+    
+    ws.onerror = (error) => {
+      console.error('WebSocket connection error:', error);
+    };
+    
+    return ws;
+  } catch (error) {
+    console.error('Failed to create WebSocket connection:', error);
+    throw error;
+  }
 };

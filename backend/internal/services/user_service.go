@@ -3,7 +3,6 @@ package services
 import (
 	"backend/internal/models"
 	"backend/internal/store"
-	"database/sql"
 	"errors"
 	"log"
 	"time"
@@ -40,17 +39,8 @@ func NewUserService(s store.StoreInterface) *UserService {
 func (s *UserService) RegisterUser(username, password string) (*models.User, error) {
 	log.Printf("RegisterUser: Starting registration for username: %s", username)
 	
-	// Check if username already exists
-	_, err := s.GetUserByUsername(username)
-	if err == nil {
-		// User already exists
-		log.Printf("RegisterUser: Username %s already exists", username)
-		return nil, errors.New("username already exists")
-	} else if err != sql.ErrNoRows {
-		// Some other database error occurred
-		log.Printf("RegisterUser: Error checking for existing username: %v", err)
-		return nil, err
-	}
+	// Skip the username check and directly try to create the user
+	// The database will enforce uniqueness constraint on the username
 	
 	// Hash the password for security
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -70,8 +60,15 @@ func (s *UserService) RegisterUser(username, password string) (*models.User, err
 
 	// Save the user to the database
 	log.Printf("RegisterUser: Attempting to save user to database")
-	if err := s.store.CreateUser(newUser); err != nil {
+	if err = s.store.CreateUser(newUser); err != nil {
 		log.Printf("RegisterUser: Database error creating user: %v", err)
+		
+		// Check if the error is due to a duplicate username
+		if err.Error() == "UNIQUE constraint failed: users.username" || 
+		   err.Error() == "pq: duplicate key value violates unique constraint \"users_username_key\"" {
+			return nil, errors.New("username already exists")
+		}
+		
 		return nil, err
 	}
 

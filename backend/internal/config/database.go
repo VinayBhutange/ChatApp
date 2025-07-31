@@ -40,8 +40,8 @@ func (c *DatabaseConfig) SQLiteConnectionString() string {
 
 // IsSQLite returns true if the database is SQLite
 func (c *DatabaseConfig) IsSQLite() bool {
-	// Always return false to use PostgreSQL
-	return false
+	// Check if DB_TYPE environment variable is set to sqlite
+	return getEnv("DB_TYPE", "sqlite") == "sqlite"
 }
 
 // Helper function to get environment variables with default values

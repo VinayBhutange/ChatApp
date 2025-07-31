@@ -2,6 +2,8 @@ package store
 
 import (
 	"backend/internal/models"
+	"database/sql"
+	"log"
 	"time"
 )
 
@@ -30,14 +32,24 @@ func (s *DBStore) GetUserByUsername(username string) (*models.User, error) {
 		query = `SELECT id, username, password FROM users WHERE username = $1`
 	}
 	
+	log.Printf("DBStore.GetUserByUsername: Looking for username: %s with query: %s", username, query)
 	row := s.db.QueryRow(query, username)
 
 	var user models.User
 	err := row.Scan(&user.ID, &user.Username, &user.Password)
 	if err != nil {
+		log.Printf("DBStore.GetUserByUsername: Error scanning row: %v (type: %T)", err, err)
+		
+		// Important: Convert any error to sql.ErrNoRows when the user is not found
+		// This ensures the RegisterUser function works correctly
+		if err == sql.ErrNoRows || err.Error() == "sql: no rows in result set" {
+			log.Printf("DBStore.GetUserByUsername: Converting to sql.ErrNoRows")
+			return nil, sql.ErrNoRows
+		}
 		return nil, err
 	}
 
+	log.Printf("DBStore.GetUserByUsername: Found user with ID: %s", user.ID)
 	return &user, nil
 }
 

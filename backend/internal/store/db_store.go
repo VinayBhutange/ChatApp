@@ -26,14 +26,13 @@ func NewDBStore(cfg *config.DatabaseConfig) (*DBStore, error) {
 	var db *sql.DB
 	var err error
 
-	// Use PostgreSQL by default
-	log.Println("Using PostgreSQL database")
-	db, err = sql.Open("postgres", cfg.ConnectionString())
-
-	// Keep SQLite as a fallback option if explicitly configured
+	// Choose database type based on configuration
 	if cfg.IsSQLite() {
 		log.Println("Using SQLite database")
 		db, err = sql.Open("sqlite3", cfg.SQLiteConnectionString())
+	} else {
+		log.Println("Using PostgreSQL database")
+		db, err = sql.Open("postgres", cfg.ConnectionString())
 	}
 
 	if err != nil {
@@ -63,8 +62,13 @@ func (s *DBStore) Close() error {
 func (s *DBStore) Migrate() error {
 	log.Println("Starting database migration")
 
-	// Always use PostgreSQL schema
-	schema := postgresMigrationSchema
+	// Choose the appropriate schema based on database type
+	var schema string
+	if s.config.IsSQLite() {
+		schema = sqliteMigrationSchema
+	} else {
+		schema = postgresMigrationSchema
+	}
 
 	_, err := s.db.Exec(schema)
 	if err != nil {

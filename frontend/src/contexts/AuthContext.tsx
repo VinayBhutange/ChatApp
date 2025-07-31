@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState } from '../types';
 import { getToken, setToken, clearToken, loginUser, registerUser } from '../services/api';
+import { testRegister } from '../services/testApi';
 
 interface AuthContextType extends AuthState {
   login: (username: string, password: string) => Promise<void>;
@@ -90,10 +91,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const register = async (username: string, password: string) => {
     setState({ ...state, isLoading: true, error: null });
     try {
-      const user = await registerUser(username, password);
+      console.log('Attempting registration with test endpoint');
+      // Use the test registration endpoint instead of the regular one
+      const user = await testRegister(username, password);
+      console.log('Test registration successful, attempting login');
       // After registration, automatically log in
       await login(username, password);
     } catch (error) {
+      console.error('Registration error:', error);
       setState({
         ...state,
         isLoading: false,

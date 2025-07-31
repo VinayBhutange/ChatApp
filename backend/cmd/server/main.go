@@ -39,8 +39,12 @@ func main() {
 	roomHandler := handlers.NewRoomHandler(roomService)
 	wsHandler := handlers.NewWebSocketHandler(messageService)
 
+	// Start WebSocket hub in a goroutine
+	go wsHandler.Run()
+	log.Println("WebSocket hub started")
+
 	// Initialize router
-	router := api.NewRouter(userHandler, roomHandler, wsHandler)
+	router := api.NewRouter(userHandler, roomHandler, wsHandler, dbStore)
 
 	// Get port from environment variable or use default
 	port := os.Getenv("PORT")
