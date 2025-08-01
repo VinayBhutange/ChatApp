@@ -1,5 +1,6 @@
 import React from 'react';
 import { Message } from '../types';
+import { generateAvatarColor } from '../services/avatarService';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/ChatMessage.css';
 
@@ -19,6 +20,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 
   return (
     <div className={`message-container ${isOwnMessage ? 'own-message' : 'other-message'}`}>
+      {!isOwnMessage && (
+        <div className="message-avatar" style={{ backgroundColor: generateAvatarColor(message.sender) }}>
+          {message.sender.charAt(0).toUpperCase()}
+        </div>
+      )}
       <div className="message-bubble">
         {!isOwnMessage && (
           <div className="sender-name">{message.sender || 'Unknown User'}</div>

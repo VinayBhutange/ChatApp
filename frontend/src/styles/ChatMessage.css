@@ -3,7 +3,15 @@
   display: flex;
   margin-bottom: 12px;
   max-width: 75%;
-  flex-direction: column; /* Stack bubble and sender info */
+}
+
+.own-message {
+  flex-direction: column; /* Keep as column since it has no avatar */
+}
+
+.other-message {
+  flex-direction: row; /* Change to row to place avatar next to bubble */
+  gap: 10px; /* Space between avatar and bubble */
 }
 
 /* Align own messages to the right */
@@ -69,4 +77,18 @@
 
 .own-message .message-time {
   color: #669353;
+}
+
+/* Avatar next to the message bubble */
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  flex-shrink: 0; /* Prevent avatar from shrinking */
+  align-self: flex-end; /* Align to the bottom of the message bubble */
 }

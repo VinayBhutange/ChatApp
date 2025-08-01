@@ -1,0 +1,112 @@
+.icon-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 80px;
+  height: 100vh;
+  background-color: #4a00e0; /* Deep purple from design */
+  color: white;
+  padding: 20px 0;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header .logo {
+  font-size: 2rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 25px; /* Space between icons */
+}
+
+.nav-item {
+  font-size: 1.5rem;
+  color: #c7c7c7; /* Light grey for inactive icons */
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.nav-item.active {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-footer {
+  position: relative; /* Crucial for positioning the menu */
+}
+
+.sidebar-footer .user-avatar-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.logout-menu {
+  position: absolute;
+  bottom: 5px; /* Align with the bottom of the avatar */
+  left: 90px; /* Position to the right of the 80px sidebar */
+  width: 180px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  z-index: 1000;
+  border: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.logout-menu::after { /* The little triangle pointing left */
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%; /* Position on the left edge of the menu */
+  margin-top: -8px; /* Vertically center the 16px high triangle */
+  border-width: 8px;
+  border-style: solid;
+  border-color: transparent #fff transparent transparent;
+}
+
+.menu-user-info {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 5px;
+  text-align: center;
+  color: #333;
+}
+
+.logout-button-menu {
+  background: none;
+  border: none;
+  color: #d9534f; /* A reddish color for logout */
+  padding: 10px 12px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.logout-button-menu:hover {
+  background-color: #f7f7f7;
+}

@@ -3,26 +3,31 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .auth-card {
   width: 100%;
-  max-width: 400px;
-  padding: 2rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 420px;
+  padding: 3rem;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .auth-card h2 {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   text-align: center;
   color: #333;
+  font-size: 2rem;
+  font-weight: 600;
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
@@ -34,36 +39,47 @@
 
 .form-group input {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.9rem 1rem;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
 }
 
 .auth-button {
   width: 100%;
-  padding: 0.75rem;
+  padding: 1rem;
   margin-top: 1rem;
-  background-color: #4a69bd;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
 }
 
 .auth-button:hover {
-  background-color: #3c55a5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .auth-button:disabled {
-  background-color: #a5b1c2;
+  background: #a5b1c2;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .auth-toggle {
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   text-align: center;
   color: #666;
 }
@@ -71,8 +87,8 @@
 .toggle-button {
   background: none;
   border: none;
-  color: #4a69bd;
-  font-weight: 500;
+  color: #667eea;
+  font-weight: 600;
   cursor: pointer;
   padding: 0;
   font-size: 1rem;
@@ -83,10 +99,11 @@
 }
 
 .error-message {
-  padding: 0.75rem;
-  margin-bottom: 1rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
   background-color: #f8d7da;
   color: #721c24;
-  border-radius: 4px;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
   text-align: center;
 }
