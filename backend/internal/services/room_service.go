@@ -18,11 +18,13 @@ func NewRoomService(s store.StoreInterface) *RoomService {
 }
 
 // CreateRoom handles the business logic of creating a new chat room.
-func (s *RoomService) CreateRoom(name, creatorID string) (*models.ChatRoom, error) {
+func (s *RoomService) CreateRoom(name, ownerID, roomType string) (*models.ChatRoom, error) {
 	// Create a new room model
 	newRoom := &models.ChatRoom{
-		ID:   uuid.NewString(),
-		Name: name,
+		ID:       uuid.NewString(),
+		Name:     name,
+		OwnerID:  ownerID,
+		RoomType: roomType,
 	}
 
 	// Save the room to the database
@@ -30,21 +32,33 @@ func (s *RoomService) CreateRoom(name, creatorID string) (*models.ChatRoom, erro
 		return nil, err
 	}
 
+	// Add the owner as the first member of the room
+	firstMember := &models.RoomMember{
+		RoomID: newRoom.ID,
+		UserID: ownerID,
+		Status: "member", // The owner is automatically a member
+	}
+
+	if err := s.store.AddRoomMember(firstMember); err != nil {
+		// In a real-world app, we might want to roll back the room creation here.
+		return nil, err
+	}
+
 	return newRoom, nil
 }
 
-// GetRooms returns all chat rooms.
-func (s *RoomService) GetRooms() ([]models.ChatRoom, error) {
-	rooms, err := s.store.GetAllRooms()
+// GetRoomsForUser returns all public rooms plus private rooms the user is a member of.
+func (s *RoomService) GetRoomsForUser(userID string) ([]models.ChatRoom, error) {
+	rooms, err := s.store.GetRoomsByUserID(userID)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Convert []*models.ChatRoom to []models.ChatRoom
 	result := make([]models.ChatRoom, len(rooms))
 	for i, room := range rooms {
 		result[i] = *room
 	}
-	
+
 	return result, nil
 }

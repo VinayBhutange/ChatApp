@@ -90,7 +90,10 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS chat_rooms (
     id TEXT PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    owner_id TEXT NOT NULL,
+    room_type TEXT NOT NULL DEFAULT 'public', -- can be 'public' or 'private'
+    FOREIGN KEY (owner_id) REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -101,6 +104,15 @@ CREATE TABLE IF NOT EXISTS messages (
     timestamp DATETIME NOT NULL,
     FOREIGN KEY (room_id) REFERENCES chat_rooms(id),
     FOREIGN KEY (sender_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS room_members (
+    room_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending', -- can be 'member' or 'pending'
+    PRIMARY KEY (room_id, user_id),
+    FOREIGN KEY (room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `
 
@@ -114,7 +126,10 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS chat_rooms (
     id TEXT PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    owner_id TEXT NOT NULL,
+    room_type TEXT NOT NULL DEFAULT 'public', -- can be 'public' or 'private'
+    FOREIGN KEY (owner_id) REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -125,5 +140,14 @@ CREATE TABLE IF NOT EXISTS messages (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     FOREIGN KEY (room_id) REFERENCES chat_rooms(id),
     FOREIGN KEY (sender_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS room_members (
+    room_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending', -- can be 'member' or 'pending'
+    PRIMARY KEY (room_id, user_id),
+    FOREIGN KEY (room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `

@@ -11,8 +11,10 @@ type User struct {
 
 // ChatRoom represents a chat room in the system.
 type ChatRoom struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	OwnerID  string `json:"ownerId" db:"owner_id"`
+	RoomType string `json:"roomType" db:"room_type"` // 'public' or 'private'
 }
 
 // Message represents a chat message in the system.
@@ -23,4 +25,11 @@ type Message struct {
 	Content        string    `json:"content" db:"content"`
 	Timestamp      time.Time `json:"timestamp" db:"timestamp"`
 	SenderUsername string    `json:"-"` // This field is for internal use and not stored in the DB
+}
+
+// RoomMember represents the relationship between a user and a room.
+type RoomMember struct {
+	RoomID string `json:"roomId" db:"room_id"`
+	UserID string `json:"userId" db:"user_id"`
+	Status string `json:"status" db:"status"` // e.g., "member", "pending"
 }

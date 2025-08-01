@@ -1,17 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useChat } from '../contexts/ChatContext';
 import { generateAvatarColor } from '../services/avatarService';
 import '../styles/ConversationList.css';
+import '../styles/Modal.css';
 
 const ConversationList: React.FC = () => {
-  const { rooms, joinRoom, currentRoom } = useChat();
+  const { rooms, joinRoom, currentRoom, createNewRoom } = useChat();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newRoomName, setNewRoomName] = useState('');
+
+  const handleCreateRoom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newRoomName.trim()) {
+      try {
+        await createNewRoom(newRoomName.trim());
+        setNewRoomName('');
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error('Failed to create room:', error);
+        // Optionally, show an error message to the user in the modal
+      }
+    }
+  };
 
   return (
     <div className="conversation-list">
       <div className="conversation-header">
         <h2>Chat</h2>
         {/* This button is currently for show; functionality can be added later */}
-        <button className="new-message-btn">+ New Room</button>
+        <button className="new-message-btn" onClick={() => setIsModalOpen(true)}>+ New Room</button>
       </div>
       <div className="search-bar">
         <input type="text" placeholder="Search" />
@@ -37,6 +54,36 @@ const ConversationList: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {isModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>Create New Room</h2>
+              <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>&times;</button>
+            </div>
+            <form onSubmit={handleCreateRoom}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label htmlFor="roomName">Room Name</label>
+                  <input
+                    type="text"
+                    id="roomName"
+                    value={newRoomName}
+                    onChange={(e) => setNewRoomName(e.target.value)}
+                    placeholder="Enter a name for your new room"
+                    autoFocus
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="modal-button secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                <button type="submit" className="modal-button primary">Create</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

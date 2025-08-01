@@ -3,77 +3,77 @@ package store
 import (
 	"backend/internal/models"
 	"database/sql"
-	"log"
 	"time"
 )
 
-// CreateUser inserts a new user into the database.
+// CreateUser creates a new user in the database.
 func (s *DBStore) CreateUser(user *models.User) error {
-	var query string
-	if s.config.IsSQLite() {
-		query = `INSERT INTO users (id, username, password) VALUES (?, ?, ?)`
-	} else {
+	query := `INSERT INTO users (id, username, password) VALUES (?, ?, ?)`
+	if !s.config.IsSQLite() {
 		query = `INSERT INTO users (id, username, password) VALUES ($1, $2, $3)`
 	}
-	
 	_, err := s.db.Exec(query, user.ID, user.Username, user.Password)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
-// GetUserByUsername retrieves a user from the database by username.
+// GetUserByUsername retrieves a user by their username.
 func (s *DBStore) GetUserByUsername(username string) (*models.User, error) {
-	var query string
-	if s.config.IsSQLite() {
-		query = `SELECT id, username, password FROM users WHERE username = ?`
-	} else {
+	query := `SELECT id, username, password FROM users WHERE username = ?`
+	if !s.config.IsSQLite() {
 		query = `SELECT id, username, password FROM users WHERE username = $1`
 	}
-	
-	log.Printf("DBStore.GetUserByUsername: Looking for username: %s with query: %s", username, query)
-	row := s.db.QueryRow(query, username)
 
 	var user models.User
-	err := row.Scan(&user.ID, &user.Username, &user.Password)
+	err := s.db.QueryRow(query, username).Scan(&user.ID, &user.Username, &user.Password)
 	if err != nil {
-		log.Printf("DBStore.GetUserByUsername: Error scanning row: %v (type: %T)", err, err)
-		
-		// Important: Convert any error to sql.ErrNoRows when the user is not found
-		// This ensures the RegisterUser function works correctly
-		if err == sql.ErrNoRows || err.Error() == "sql: no rows in result set" {
-			log.Printf("DBStore.GetUserByUsername: Converting to sql.ErrNoRows")
-			return nil, sql.ErrNoRows
+		if err == sql.ErrNoRows {
+			return nil, nil // No user found is not an error
 		}
 		return nil, err
 	}
-
-	log.Printf("DBStore.GetUserByUsername: Found user with ID: %s", user.ID)
 	return &user, nil
 }
 
 // CreateRoom creates a new chat room in the database.
 func (s *DBStore) CreateRoom(room *models.ChatRoom) error {
-	var query string
-	if s.config.IsSQLite() {
-		query = `INSERT INTO chat_rooms (id, name) VALUES (?, ?)`
-	} else {
-		query = `INSERT INTO chat_rooms (id, name) VALUES ($1, $2)`
+	query := `INSERT INTO chat_rooms (id, name, owner_id, room_type) VALUES (?, ?, ?, ?)`
+	if !s.config.IsSQLite() {
+		query = `INSERT INTO chat_rooms (id, name, owner_id, room_type) VALUES ($1, $2, $3, $4)`
 	}
-	
-	_, err := s.db.Exec(query, room.ID, room.Name)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	_, err := s.db.Exec(query, room.ID, room.Name, room.OwnerID, room.RoomType)
+	return err
 }
 
-// GetAllRooms retrieves all chat rooms from the database.
-func (s *DBStore) GetAllRooms() ([]*models.ChatRoom, error) {
-	// This query is the same for both SQLite and PostgreSQL
-	const query = `SELECT id, name FROM chat_rooms`
-	rows, err := s.db.Query(query)
+// AddRoomMember adds a user to a room with a specific status.
+func (s *DBStore) AddRoomMember(member *models.RoomMember) error {
+	query := `INSERT INTO room_members (room_id, user_id, status) VALUES (?, ?, ?)`
+	if !s.config.IsSQLite() {
+		query = `INSERT INTO room_members (room_id, user_id, status) VALUES ($1, $2, $3)`
+	}
+
+	_, err := s.db.Exec(query, member.RoomID, member.UserID, member.Status)
+	return err
+}
+
+// GetRoomsByUserID fetches all public rooms and private rooms the user is a member of.
+func (s *DBStore) GetRoomsByUserID(userID string) ([]*models.ChatRoom, error) {
+	query := `
+		SELECT DISTINCT cr.id, cr.name, cr.owner_id, cr.room_type
+		FROM chat_rooms cr
+		LEFT JOIN room_members rm ON cr.id = rm.room_id
+		WHERE cr.room_type = 'public' OR (rm.user_id = ? AND rm.status = 'member')
+	`
+	if !s.config.IsSQLite() {
+		query = `
+			SELECT DISTINCT cr.id, cr.name, cr.owner_id, cr.room_type
+			FROM chat_rooms cr
+			LEFT JOIN room_members rm ON cr.id = rm.room_id
+			WHERE cr.room_type = 'public' OR (rm.user_id = $1 AND rm.status = 'member')
+		`
+	}
+
+	rows, err := s.db.Query(query, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -82,44 +82,33 @@ func (s *DBStore) GetAllRooms() ([]*models.ChatRoom, error) {
 	var rooms []*models.ChatRoom
 	for rows.Next() {
 		var room models.ChatRoom
-		if err := rows.Scan(&room.ID, &room.Name); err != nil {
+		if err := rows.Scan(&room.ID, &room.Name, &room.OwnerID, &room.RoomType); err != nil {
 			return nil, err
 		}
 		rooms = append(rooms, &room)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return rooms, nil
+	return rooms, rows.Err()
 }
 
-// SaveMessage saves a message to the database.
+// SaveMessage saves a new message to the database.
 func (s *DBStore) SaveMessage(message *models.Message) error {
-	var query string
-	if s.config.IsSQLite() {
-		query = `INSERT INTO messages (id, room_id, sender_id, content, timestamp) VALUES (?, ?, ?, ?, ?)`
-	} else {
+	query := `INSERT INTO messages (id, room_id, sender_id, content, timestamp) VALUES (?, ?, ?, ?, ?)`
+	if !s.config.IsSQLite() {
 		query = `INSERT INTO messages (id, room_id, sender_id, content, timestamp) VALUES ($1, $2, $3, $4, $5)`
 	}
-	
+
 	_, err := s.db.Exec(query, message.ID, message.RoomID, message.SenderID, message.Content, message.Timestamp)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
-// GetMessagesByRoom retrieves messages for a specific room from the database.
+// GetMessagesByRoom retrieves all messages for a specific room.
 func (s *DBStore) GetMessagesByRoom(roomID string) ([]*models.Message, error) {
-	var query string
-	if s.config.IsSQLite() {
-		query = `SELECT id, room_id, sender_id, content, timestamp FROM messages WHERE room_id = ? ORDER BY timestamp DESC LIMIT 50`
-	} else {
-		query = `SELECT id, room_id, sender_id, content, timestamp FROM messages WHERE room_id = $1 ORDER BY timestamp DESC LIMIT 50`
+	query := `SELECT id, room_id, sender_id, content, timestamp FROM messages WHERE room_id = ? ORDER BY timestamp ASC`
+	if !s.config.IsSQLite() {
+		query = `SELECT id, room_id, sender_id, content, timestamp FROM messages WHERE room_id = $1 ORDER BY timestamp ASC`
 	}
-	
+
 	rows, err := s.db.Query(query, roomID)
 	if err != nil {
 		return nil, err
@@ -135,22 +124,16 @@ func (s *DBStore) GetMessagesByRoom(roomID string) ([]*models.Message, error) {
 		messages = append(messages, &msg)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return messages, nil
+	return messages, rows.Err()
 }
 
 // GetMessagesSince retrieves messages for a specific room since a given time.
 func (s *DBStore) GetMessagesSince(roomID string, since time.Time) ([]*models.Message, error) {
-	var query string
-	if s.config.IsSQLite() {
-		query = `SELECT id, room_id, sender_id, content, timestamp FROM messages WHERE room_id = ? AND timestamp > ? ORDER BY timestamp ASC`
-	} else {
+	query := `SELECT id, room_id, sender_id, content, timestamp FROM messages WHERE room_id = ? AND timestamp > ? ORDER BY timestamp ASC`
+	if !s.config.IsSQLite() {
 		query = `SELECT id, room_id, sender_id, content, timestamp FROM messages WHERE room_id = $1 AND timestamp > $2 ORDER BY timestamp ASC`
 	}
-	
+
 	rows, err := s.db.Query(query, roomID, since)
 	if err != nil {
 		return nil, err
@@ -166,9 +149,5 @@ func (s *DBStore) GetMessagesSince(roomID string, since time.Time) ([]*models.Me
 		messages = append(messages, &msg)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return messages, nil
+	return messages, rows.Err()
 }

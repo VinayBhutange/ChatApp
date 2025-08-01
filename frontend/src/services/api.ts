@@ -99,9 +99,8 @@ export const logout = (): void => {
 };
 
 // Room API calls
-export const getRooms = async (): Promise<Room[]> => {
-  const response = await apiRequest('/rooms');
-  return response.rooms;
+export const getRooms = async (): Promise<{ rooms: Room[] }> => {
+  return apiRequest('/rooms');
 };
 
 export const createRoom = async (name: string): Promise<Room> => {

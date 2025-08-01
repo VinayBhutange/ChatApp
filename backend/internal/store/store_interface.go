@@ -5,22 +5,23 @@ import (
 	"time"
 )
 
-// StoreInterface defines the methods that any store implementation must provide
+// StoreInterface defines the methods that any store implementation must provide.
+
 type StoreInterface interface {
-	// User operations
+	Migrate() error
+	Close() error
+
+	// User methods
 	CreateUser(user *models.User) error
 	GetUserByUsername(username string) (*models.User, error)
-	
-	// Room operations
+
+	// Room methods
 	CreateRoom(room *models.ChatRoom) error
-	GetAllRooms() ([]*models.ChatRoom, error)
-	
-	// Message operations
+	GetRoomsByUserID(userID string) ([]*models.ChatRoom, error)
+	AddRoomMember(member *models.RoomMember) error
+
+	// Message methods
 	SaveMessage(message *models.Message) error
 	GetMessagesByRoom(roomID string) ([]*models.Message, error)
 	GetMessagesSince(roomID string, since time.Time) ([]*models.Message, error)
-	
-	// Database operations
-	Migrate() error
-	Close() error
 }

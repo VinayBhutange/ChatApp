@@ -48,7 +48,8 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	room, err := h.roomService.CreateRoom(req.Name, user.ID)
+	// Create all new rooms as 'private' by default
+	room, err := h.roomService.CreateRoom(req.Name, user.ID, "private")
 	if err != nil {
 		http.Error(w, "Failed to create room", http.StatusInternalServerError)
 		return
@@ -59,11 +60,16 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(room)
 }
 
-// GetRooms handles listing all available chat rooms.
+// GetRooms handles listing all rooms a user has access to.
 func (h *RoomHandler) GetRooms(w http.ResponseWriter, r *http.Request) {
-	// This endpoint doesn't require authentication check as we're just listing rooms
+	// Get the authenticated user from context
+	user, ok := middleware.GetUserFromContext(r.Context())
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
-	rooms, err := h.roomService.GetRooms()
+	rooms, err := h.roomService.GetRoomsForUser(user.ID)
 	if err != nil {
 		http.Error(w, "Failed to retrieve rooms", http.StatusInternalServerError)
 		return

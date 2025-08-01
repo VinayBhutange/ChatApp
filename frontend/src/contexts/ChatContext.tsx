@@ -98,7 +98,8 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const fetchRooms = async () => {
     setState((prevState) => ({ ...prevState, isLoading: true, error: null }));
     try {
-      const rooms = await getRooms();
+      const response = await getRooms();
+      const rooms = response.rooms || [];
       setState((prevState) => ({
         ...prevState,
         rooms,
