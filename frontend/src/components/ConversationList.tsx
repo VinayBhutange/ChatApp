@@ -18,25 +18,21 @@ const ConversationList: React.FC = () => {
         setIsModalOpen(false);
       } catch (error) {
         console.error('Failed to create room:', error);
-        // Optionally, show an error message to the user in the modal
+        // Optionally, display an error message to the user
       }
     }
   };
 
   return (
     <div className="conversation-list">
-      <div className="conversation-header">
-        <h2>Chat</h2>
-        {/* This button is currently for show; functionality can be added later */}
-        <button className="new-message-btn" onClick={() => setIsModalOpen(true)}>+ New Room</button>
+      <div className="conversation-list-header">
+        <h2>Conversations</h2>
+        <button className="new-room-btn" onClick={() => setIsModalOpen(true)}>+</button>
       </div>
-      <div className="search-bar">
-        <input type="text" placeholder="Search" />
-      </div>
-      <div className="conversations">
-        {rooms.map(room => (
-          <div 
-            key={room.id} 
+      <ul>
+        {rooms.map((room) => (
+          <li
+            key={room.id}
             className={`conversation-item ${currentRoom?.id === room.id ? 'active' : ''}`}
             onClick={() => joinRoom(room.id)}
           >
@@ -44,26 +40,21 @@ const ConversationList: React.FC = () => {
               {room.name.charAt(0).toUpperCase()}
             </div>
             <div className="conversation-details">
-              <div className="conversation-name-time">
-                <span className="name">{room.name}</span>
-              </div>
-              <div className="conversation-message">
-                <p>Click to join this room</p>
-              </div>
+              <span className="conversation-name">{room.name}</span>
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
 
       {isModalOpen && (
-        <div className="modal-backdrop">
-          <div className="modal-content">
+        <div className="modal-overlay">
+          <div className="modal">
             <div className="modal-header">
               <h2>Create New Room</h2>
               <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>&times;</button>
             </div>
-            <form onSubmit={handleCreateRoom}>
-              <div className="modal-body">
+            <div className="modal-body">
+              <form onSubmit={handleCreateRoom}>
                 <div className="form-group">
                   <label htmlFor="roomName">Room Name</label>
                   <input
@@ -75,12 +66,12 @@ const ConversationList: React.FC = () => {
                     autoFocus
                   />
                 </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="modal-button secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button type="submit" className="modal-button primary">Create</button>
-              </div>
-            </form>
+                <div className="modal-footer">
+                  <button type="button" className="modal-button secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                  <button type="submit" className="modal-button primary">Create</button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
