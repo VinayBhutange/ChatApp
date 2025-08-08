@@ -89,6 +89,11 @@ func (s *UserService) AuthenticateUser(username, password string) (string, error
 		return "", errors.New("invalid username or password")
 	}
 
+	// Additional safety check to prevent nil pointer dereference
+	if user == nil {
+		return "", errors.New("invalid username or password")
+	}
+
 	// Compare the provided password with the stored hash
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {

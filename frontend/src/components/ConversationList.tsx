@@ -47,8 +47,8 @@ const ConversationList: React.FC = () => {
       </ul>
 
       {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className="modal-backdrop">
+          <div className="modal-content">
             <div className="modal-header">
               <h2>Create New Room</h2>
               <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>&times;</button>

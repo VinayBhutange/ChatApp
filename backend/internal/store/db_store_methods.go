@@ -3,6 +3,7 @@ package store
 import (
 	"backend/internal/models"
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -27,7 +28,7 @@ func (s *DBStore) GetUserByUsername(username string) (*models.User, error) {
 	err := s.db.QueryRow(query, username).Scan(&user.ID, &user.Username, &user.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil // No user found is not an error
+			return nil, errors.New("user not found")
 		}
 		return nil, err
 	}

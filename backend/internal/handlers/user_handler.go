@@ -98,15 +98,19 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Authenticate the user
+	log.Printf("Attempting to authenticate user: %s", req.Username)
 	token, err := h.userService.AuthenticateUser(req.Username, req.Password)
 	if err != nil {
+		log.Printf("Authentication failed for user %s: %v", req.Username, err)
 		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
 		return
 	}
 
 	// Get the user details from the service
+	log.Printf("Retrieving user details for: %s", req.Username)
 	user, err := h.userService.GetUserByUsername(req.Username)
 	if err != nil {
+		log.Printf("Failed to retrieve user details for %s: %v", req.Username, err)
 		http.Error(w, "Failed to retrieve user details", http.StatusInternalServerError)
 		return
 	}

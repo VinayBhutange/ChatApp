@@ -16,7 +16,7 @@ func NewRouter(userHandler *handlers.UserHandler, roomHandler *handlers.RoomHand
 	// Public routes - no authentication required
 	router.HandleFunc("/api/register", userHandler.Register)
 	router.HandleFunc("/api/login", userHandler.Login)
-	router.HandleFunc("/api/rooms", roomHandler.GetRooms) // Public endpoint to list rooms
+	router.Handle("/api/rooms", middleware.RequireAuth(roomHandler.GetRooms)) // Protected endpoint to list rooms
 	
 	// Test endpoint for debugging registration issues
 	router.HandleFunc("/api/test/register", testHandler.TestRegister)

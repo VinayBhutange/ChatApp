@@ -5,6 +5,7 @@ import (
 	"backend/internal/models"
 	"backend/internal/services"
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -48,9 +49,10 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create all new rooms as 'private' by default
-	room, err := h.roomService.CreateRoom(req.Name, user.ID, "private")
+	// Create all new rooms as 'public' by default so all users can see and join them
+	room, err := h.roomService.CreateRoom(req.Name, user.ID, "public")
 	if err != nil {
+		log.Printf("Error creating room: %v", err)
 		http.Error(w, "Failed to create room", http.StatusInternalServerError)
 		return
 	}
@@ -71,6 +73,7 @@ func (h *RoomHandler) GetRooms(w http.ResponseWriter, r *http.Request) {
 
 	rooms, err := h.roomService.GetRoomsForUser(user.ID)
 	if err != nil {
+		log.Printf("Error getting rooms for user %s: %v", user.ID, err)
 		http.Error(w, "Failed to retrieve rooms", http.StatusInternalServerError)
 		return
 	}
