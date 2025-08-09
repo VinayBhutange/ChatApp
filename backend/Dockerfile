@@ -1,5 +1,5 @@
 # Start from the official Go image
-FROM golang:1.18-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 # Install git and build dependencies
 RUN apk add --no-cache git gcc musl-dev
