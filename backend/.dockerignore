@@ -1,0 +1,47 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+plan.md
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+chatapp
+*.exe
+
+# Go specific
+vendor/
+*.test
+*.prof
+
+# Docker
+Dockerfile*
+docker-compose*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+tmp/
+temp/
